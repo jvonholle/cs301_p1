@@ -50,10 +50,10 @@ display:
         push rbp
         mov rbp, rsp
 
-    mov edi, 16384
+    mov rdi, 16384
         call glClear  ; glClear( GL_COLOR_BUFFER_BIT );
 
-    mov edi, 9
+    mov rdi, 9
         call glBegin ; glBegin( GL_POLYGON );
 
 ; ********
@@ -154,20 +154,20 @@ main:
     mov rbp, rsp
     sub rsp, 16
 
-    mov rsi, [rbp-16]
-    lea rdi, [rbp-4]
-        call glutInit
+    mov rsi, [rbp-16] ; argv
+    lea rdi, [rbp-4]  ; argc
+        call glutInit ; glutInit( &argc, argv );
 
     mov rdi,0
         call glutInitDisplayMode
-        mov rdi, 960
-        mov rsi, 1080
+    mov rdi, 960
+    mov rsi, 1080
         call glutInitWindowSize
-        mov rdi, msg
+    mov rdi, msg
         call glutCreateWindow
-        mov rdi, display
+    mov rdi, display
         call glutDisplayFunc
-        call glutMainLoop
+    call glutMainLoop
 
     mov rsp, rbp
     pop rbp

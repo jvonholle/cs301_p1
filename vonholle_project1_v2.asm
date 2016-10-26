@@ -14,7 +14,7 @@ global main
     extern glClearColor
     extern glutSwapBuffers
     extern glutReshapeFunc
-    extern glClearDepth
+    extern glClearDepthf
     extern glutInitWindowPosition
     extern glEnable
     extern glRotatef
@@ -43,6 +43,7 @@ global main
 
     section .text
     window_title: db '3d here we go! Woo!',0xA,0x0
+    msg:          db 'done with thing',0xA,0x0
     zero:       dd 0.0
     one:        dd 1.0
     half:       dd 0.5
@@ -69,14 +70,15 @@ global main
     bv3: dd 0.411764705
 
 display:
-    push rbp
-    mov rbp, rsp
+;pseudo constructor to deal with local variables
+    push rbp     ; save old rbp
+    mov rbp, rsp ; point ebp to this 
 
-    mov rdi, 16384
-    OR rdi, 256
+    mov rdi, 0x000040000
+    OR  rdi, 0x000001000
         call glClear  ; glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT ); clears color and depth buffers
 
-    mov rdi, 0
+    mov rdi, 0x1700
         call glMatrixMode ; glMatrixMode( GL_MODELVIEW ); operate on a model-view matrix
 
     ; Render a colored cube, 6 quads with colors
@@ -90,7 +92,7 @@ display:
 ; * Cube *
 ; ********
 
-    mov rdi, 7 
+    mov rdi, 0x0007 
         call glBegin ; glBegin( GL_QUADS );
 
 ; Vertices defined counter-clockwise order with normal pointing out
@@ -115,9 +117,8 @@ display:
         call glVertex3f ; glVertex3f( -1.0, 1.0, 1.0 );
     movss xmm0, [one]
     movss xmm1, [one]
-    movss xmm2, [one]
-        call glVertex3f ; glVertex3f( 1.0, 1.0, 1.0 );
-
+    movss xmm2, [one] 
+        call glVertex3f ; glVertex3f( 1.0, 1.0, 1.0 ); 
 ; # Bottom Face y = -1.0 #
     movss xmm0, [rv2]
     movss xmm1, [gv2]
@@ -239,26 +240,27 @@ call glEnd ; glEnd();
 ; * Pyramid *
 ; ***********
 
-    call glLoadIdentity
+    call glLoadIdentity     ; reset model-view matrix
+    
     movss xmm0, [negonehalf]
     movss xmm1, [zero]
     movss xmm2, [negsix]
-        call glTranslatef
-    mov rdi, 4
-        call glBegin
+        call glTranslatef   ; glTranslatef( -1.5, 0.0, -6.0 );
+    mov rdi, 0x0004
+        call glBegin        ; glBegin( GL_TRIANGLES );
 ; # FRONT
     movss xmm0, [rv1]
     movss xmm1, [gv1]
     movss xmm2, [bv1]
-        call glColor3f
+        call glColor3f      ; glColor( rv1, gv1, gv1 );
     movss xmm0, [zero]
     movss xmm1, [one]
     movss xmm2, [zero]
-        call glVertex3f ; glVertex3f( 0.0, 1.0, 0.0);
+        call glVertex3f     ; glVertex3f( 0.0, 1.0, 0.0 );
     movss xmm0, [rv2]
     movss xmm1, [gv2]
     movss xmm2, [bv2]
-        call glColor3f
+        call glColor3f      ; glColor( rv2, gv2, bv2 );
     movss xmm0, [negone]
     movss xmm1, [negone]
     movss xmm2, [one]
@@ -353,18 +355,22 @@ call glEnd
 ret
 
 reshape:
-    push rdi
-    push rsi
+    push rbp
+    mov rbp, rsp ; handle local variables
 
-    mov rdx, rdi
-    mov rdi, 0
-    mov r10, rsi
+    push rdi ; push width
+    push rsi ; push height
+
+    mov rdx, 960
+    mov rcx, 1080
     mov rsi, 0
-        call glViewport
+    mov rdi, 0
+        call glViewport ; glViewport( 0, 0, width, height );
    
-    mov rdi, 1
-        call glMatrixMode
-    call glLoadIdentity
+    mov rdi, 0x1701
+        call glMatrixMode ; glMatrixMode( GL_PROJECTION );
+
+    call glLoadIdentity   ; glLoadIdentity();
 
     pop rsi
     pop rdi
@@ -375,21 +381,43 @@ reshape:
 
     movss xmm1, xmm0
     movss xmm0, [fourtyfive]
-    movss xmm2, [pointone]
+    movss xmm2, [hunned]
     movss xmm3, [hunned]
-        call gluPerspective
+        call gluPerspective ; gluPerspective( 45.0, length/width, 0.1, 100.0 )
+
+leave
+ret
+
+init:
+    movss xmm0, [zero]
+    movss xmm1, [zero]
+    movss xmm2, [zero]
+    movss xmm3, [one]
+        call glClearColor        ; glClearColor( 0.0, 0.0, 0.0, 1.0 );
+    movss xmm0, [one]
+        call glClearDepthf       ; glClearDeth( 1.0 );
+    mov rdi, 2929
+        call glEnable            ; glEnable( GL_DEPTH_TEST );
+    mov rdi, 515 
+        call glDepthFunc         ; glDepthFunc( GL_LEQUAL );
+    mov rdi, 0x0B71
+        call glShadeModel        ; glShadeModel( GL_SMOOTH );
+    mov rdi, 0x0c50
+    mov rsi, 0x1102
+        call glHint              ; glHint( GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST );
 ret
 
 main:
+; init to deal with local variables
     push rbp
-    mov rbp, rsp
-    sub rsp, 16
+    mov rbp, rsp ; point rbp at this
+    sub rsp, 16  ; make space 
 
-    mov rsi, [rbp-16]
-    lea rdi, [rbp-4]
-        call glutInit
+    mov rsi, [rbp-16] ; argv
+    lea rdi, [rbp-4]  ; argc
+        call glutInit ; glutInit(&argc, argv);
 
-    mov rdi, 4
+    mov rdi, 0x0002
         call glutInitDisplayMode ; glutInitDisplayMode( GLUT_DOUBLE );
 
     mov rdi, 960 
@@ -406,29 +434,12 @@ main:
     mov rdi, display
         call glutDisplayFunc     ; glutDisplayFunc( display() );
     mov rdi, reshape
-        call glutReshapeFunc
+        call glutReshapeFunc     ; glutReshapeFunc( reshape() );
 
-; "init function" (too lazy to figure out a better way to do this)
-    movss xmm0, [zero]
-    movss xmm1, [zero]
-    movss xmm2, [zero]
-    movss xmm3, [one]
-        call glClearColor        ; glClearColor(0.0, 0.0, 0.0, 1.0);
-    movss xmm0, [one]
-        call glClearDepth        ; glClearDeth(1.0);
-    mov rdi, 7
-        call glEnable
-    mov rdi, 3
-        call glDepthFunc
-    mov rdi, 1
-        call glShadeModel
-    mov rdi, 4
-    mov rsi, 1
-        call glHint
-; end init block
-
+    call init
     call glutMainLoop            ; glutMainLoop();
 
+    ; cleanup for local variable helper
     mov rsp, rbp
     pop rbp
 
