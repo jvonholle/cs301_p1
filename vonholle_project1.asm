@@ -24,6 +24,7 @@ global main
     extern glutCreateWindow
     extern glutDisplayFunc
     extern glutMainLoop
+    extern glRotatef
 
     section .text
     msg: db 'Hello 64-bit world!',0xA,0x0
@@ -157,19 +158,19 @@ main:
     lea rdi, [rbp-4]
         call glutInit
 
-    mov edi,0
+    mov rdi,0
         call glutInitDisplayMode
-        mov esi, 400 
-        mov edi, 400
+        mov rdi, 960
+        mov rsi, 1080
         call glutInitWindowSize
-        mov edi, msg
+        mov rdi, msg
         call glutCreateWindow
-        mov edi, display
+        mov rdi, display
         call glutDisplayFunc
         call glutMainLoop
 
     mov rsp, rbp
     pop rbp
 
-mov eax, 0
+mov rax, 0
 ret
