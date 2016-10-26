@@ -1,2 +1,2 @@
-# cs301_p1
-project 1 cs301 - Assembly
+# My CS301 Project 1
+For this project I set out to look into using assembly to draw to the screen. I initially set out to do it the old fashioned way with bios interups and VGA memory buffers, but it turns out this is really hard to do witout writting the rest of an OS as well. After that setback I resorted to making calls to OpenGL from inside assembly. This worked out quite well, after finding a very informative forum post I was able to successfully draw a box and a triangle on screen. I am currently working on drawing a cube and a pyramid, I hope to have this done by the final due date.
