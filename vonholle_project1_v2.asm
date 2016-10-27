@@ -8,6 +8,8 @@
 ; https://forum.nasm.us/index.php?topic=342.0
 ; lazyfoo.net/tutorials/OpenGL/
 ; https://www.ntu.edu.sg/home/ehchua/programming/opengl/CG_Examples.html
+;
+; All hex values for openGL enums come from /usr/included/GL/gl.h
 
 global main
     extern printf
@@ -44,24 +46,23 @@ global main
 
     section .text
     window_title: db '3d here we go! Woo!',0xA,0x0
-    msg:          db 'done with thing',0xA,0x0
     zero:       dd 0.0
-    one:        dd 0.10
-    half:       dd 0.05
-    neghalf:    dd -0.05
-    negone:     dd -0.10
-    quart:      dd 0.025
-    onehalf:    dd 0.55
-    negseven:   dd -0.70
-    negsix:     dd -0.60
-    negonehalf: dd -0.55
+    one:        dd 0.10  ; The following marked values originaly matched their name
+    half:       dd 0.05  ; but I couldn't figure out how to scale the view matrix
+    neghalf:    dd -0.05 ; ranges to go beyond [-1, 1] so I just reduced these by a factor
+    negone:     dd -0.10 ; of 10
+    quart:      dd 0.025 ; --
+    onehalf:    dd 0.55  ; --
+    negseven:   dd -0.70 ; --
+    negsix:     dd -0.60 ; --
+    negonehalf: dd -0.55 ; --
     fourtyfive: dd 45.0
     pointone:   dd 0.1
     hunned:     dd 100.0
-    ONE:        dd 1.0
+    ONE:        dd 1.0   ; This was added so I could use 1 as a number because floats suck
     ten:        dd 10.0
 
-;colors
+; pretty colors
     rv1: dd 0.439215686
     gv1: dd 0.952941176
     bv1: dd 1.0
@@ -89,17 +90,17 @@ display:
     movss xmm0, [onehalf]
     movss xmm1, [zero]
     movss xmm2, [negseven]
-        call glTranslatef ; glTranslatef( 1.5, 0.0, -7.0 ); move right and into the screen
+        call glTranslatef   ; glTranslatef( 1.5, 0.0, -7.0 ); move right and into the screen
     movss xmm0, [fourtyfive]
     movss xmm1, [zero]
     movss xmm2, [ONE]
     movss xmm3, [zero]
-        call glRotatef
+        call glRotatef      ; glRotatef( 45.0, 0, 1, 0 ); rotate 45 degrees around vector <0,1,0>
     movss xmm0, [ten]
     movss xmm1, [ONE]
     movss xmm2, [zero]
     movss xmm3, [zero]
-        call glRotatef
+        call glRotatef      ; glRotatef( 10.0, 1, 0, 0 ); rotate 10 degrees around vector <1,0,0>
 
 ; ********
 ; * Cube *
@@ -265,12 +266,12 @@ call glEnd ; glEnd();
     movss xmm1, [zero]
     movss xmm2, [ONE]
     movss xmm3, [zero]
-        call glRotatef
+        call glRotatef      ; glRotatef( 45.0, 0, 1, 0 ); rotate 45 degrees around vector <0,1,0>
     movss xmm0, [ten]
     movss xmm1, [ONE]
     movss xmm2, [zero]
     movss xmm3, [zero]
-        call glRotatef
+        call glRotatef      ; glRotatef( 10.0, 1, 0, 0 ); rotate 10 degrees around vector <1,0,0>
 
     mov rdi, 0x0004
         call glBegin        ; glBegin( GL_TRIANGLES );
@@ -290,94 +291,94 @@ call glEnd ; glEnd();
     movss xmm0, [negone]
     movss xmm1, [negone]
     movss xmm2, [one]
-        call glVertex3f
+        call glVertex3f     ; glVertex3f( -1.0, -1.0, 0.0 );
     movss xmm0, [rv3]
     movss xmm1, [gv3]
     movss xmm2, [bv3]
-        call glColor3f
+        call glColor3f      ; glColor( rv2, gv2, bv2 );
     movss xmm0, [one]
     movss xmm1, [negone]
     movss xmm2, [one]
-        call glVertex3f
+        call glVertex3f     ; glVertex3f( 0.0, -1.0, 0.0 );
 ; # RIGHT
     movss xmm0, [rv1]
     movss xmm1, [gv1]
     movss xmm2, [bv1]
-        call glColor3f
+        call glColor3f      ; glColor( rv2, gv2, bv2 );
     movss xmm0, [zero]
     movss xmm1, [one]
     movss xmm2, [zero]
-        call glVertex3f
+        call glVertex3f     ; glVertex3f( 0.0, 1.0, 0.0 );
     movss xmm0, [rv2]
     movss xmm1, [gv2]
     movss xmm2, [bv2]
-        call glColor3f
+        call glColor3f      ; glColor( rv2, gv2, bv2 );
     movss xmm0, [one]
     movss xmm1, [negone]
     movss xmm2, [one]
-        call glVertex3f
+        call glVertex3f     ; glVertex3f( 0.0, -1.0, 0.0 );
     movss xmm0, [rv3]
     movss xmm1, [gv3]
     movss xmm2, [bv3]
-        call glColor3f
+        call glColor3f      ; glColor( rv3, gv3, bv3 );
     movss xmm0, [one]
     movss xmm1, [negone]
     movss xmm2, [negone]
-        call glVertex3f
+        call glVertex3f     ; glVertex3f( 0.0, -1.0, -1.0 );
 ; # BACK
     movss xmm0, [rv1]
     movss xmm1, [gv1]
     movss xmm2, [bv1]
-        call glColor3f
+        call glColor3f      ; glColor( rv1, gv1, bv1 );
     movss xmm0, [zero]
     movss xmm1, [one]
     movss xmm2, [zero]
-        call glVertex3f
+        call glVertex3f     ; glVertex3f( 0.0, 1.0, 0.0 );
     movss xmm0, [rv2]
     movss xmm1, [gv2]
     movss xmm2, [bv2]
-        call glColor3f
+        call glColor3f      ; glColor( rv2, gv2, bv2 );
     movss xmm0, [one]
     movss xmm1, [negone]
     movss xmm2, [negone]
-        call glVertex3f
+        call glVertex3f     ; glVertex3f( 0.0, -1.0, -1.0 );
     movss xmm0, [rv3]
     movss xmm1, [gv3]
     movss xmm2, [bv3]
-        call glColor3f
+        call glColor3f      ; glColor( rv3, gv3, bv3 );
     movss xmm0, [one]
     movss xmm1, [negone]
     movss xmm2, [negone]
-        call glVertex3f
+        call glVertex3f     ; glVertex3f( 0.0, -1.0, -1.0 );
 ; # LEFT
     movss xmm0, [rv1]
     movss xmm1, [gv1]
     movss xmm2, [bv1]
-        call glColor3f
+        call glColor3f      ; glColor( rv1, gv1, bv1 );
     movss xmm0, [zero]
     movss xmm1, [one]
     movss xmm2, [zero]
-        call glVertex3f
+        call glVertex3f     ; glVertex3f( 0.0, 0.0, 0.0 );
     movss xmm0, [rv2]
     movss xmm1, [gv2]
     movss xmm2, [bv2]
-        call glColor3f
+        call glColor3f      ; glColor( rv1, gv1, bv1 );
     movss xmm0, [negone]
     movss xmm1, [negone]
     movss xmm2, [negone]
-        call glVertex3f
+        call glVertex3f     ; glVertex3f( -1.0, -1.0, -1.0 );
     movss xmm0, [rv3]
     movss xmm1, [gv3]
     movss xmm2, [bv3]
-        call glColor3f
+        call glColor3f      ; glColor( rv1, gv1, bv1 );
     movss xmm0, [negone]
     movss xmm1, [negone]
     movss xmm2, [one]
-        call glVertex3f
+        call glVertex3f     ; glVertex3f( -1.0, -1.0, 1.0 );
 call glEnd
 
-    call glutSwapBuffers
-  leave
+    call glutSwapBuffers    ; glutSwapBuffers; // swap front and back buffers (double buffering)
+  leave ; clean-up
 ret
 
 reshape:
@@ -394,9 +395,6 @@ reshape:
         call glMatrixMode ; glMatrixMode( GL_PROJECTION );
 
     call glLoadIdentity   ; glLoadIdentity();
-
-mov rdi, msg
-call printf
 
 leave
 ret
